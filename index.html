@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Performance Analyzer | CSCI 310 Project</title>
+  <meta name="description" content="CSCI 310 Principles of Programming Languages - Student Performance Analyzer web application demonstrating Imperative and Functional programming paradigms, and a custom Mini-Interpreter DSL.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Application Shell / Top Navigation -->
+  <header class="app-header">
+    <div class="header-inner container">
+      <div class="brand-group">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">Student Performance Analyzer</h1>
+          <p class="brand-subtitle">CSCI 310 Principles of Programming Languages • Amity University Dubai</p>
+        </div>
+      </div>
+
+      <button id="mobile-menu-toggle" class="mobile-toggle" aria-label="Toggle navigation menu">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+
+      <nav id="primary-nav" class="nav-menu">
+        <a href="#dashboard" class="nav-link active" data-target="dashboard-view">
+          <span class="nav-icon">📊</span>
+          <span>Dashboard</span>
+        </a>
+        <a href="#records" class="nav-link" data-target="records-view">
+          <span class="nav-icon">👥</span>
+          <span>Student Records</span>
+        </a>
+        <a href="#reports" class="nav-link" data-target="reports-view">
+          <span class="nav-icon">📈</span>
+          <span>Performance Reports</span>
+        </a>
+        <a href="#interpreter" class="nav-link" data-target="interpreter-view">
+          <span class="nav-icon">⚡</span>
+          <span>Mini-Interpreter</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container main-content">
+    
+    <!-- ==================================================================== -->
+    <!-- SCREEN 1: DASHBOARD -->
+    <!-- ==================================================================== -->
+    <section id="dashboard-view" class="app-view active" aria-labelledby="dashboard-heading">
+      <div class="view-header">
+        <div>
+          <h2 id="dashboard-heading" class="view-title">Executive Academic Dashboard</h2>
+          <p class="view-description">Real-time cohort performance metrics dynamically recalculated using pure functional transformations.</p>
+        </div>
+        <div class="view-actions">
+          <button id="btn-reset-data-dashboard" class="btn btn-outline" title="Reset all records to initial fictional demo dataset">
+            🔄 Reset Demo Data
+          </button>
+        </div>
+      </div>
+
+      <!-- At-Risk Academic Support Banner -->
+      <div id="at-risk-banner" class="alert-banner alert-warning hidden">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-body">
+          <h4 class="alert-title">Academic Support Intervention Required</h4>
+          <p class="alert-text">The following students currently average below the 50% passing threshold and require academic tutoring:</p>
+          <div id="at-risk-list" class="at-risk-chips"></div>
+        </div>
+      </div>
+
+      <!-- Top KPI Metric Cards -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-label">Total Enrolled Students</span>
+            <span class="metric-badge-icon">🎓</span>
+          </div>
+          <div class="metric-value" id="metric-total-students">0</div>
+          <div class="metric-footer text-muted">Active records in browser storage</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-label">Class Overall Average</span>
+            <span class="metric-badge-icon">📈</span>
+          </div>
+          <div class="metric-value highlight-blue" id="metric-class-average">0.0%</div>
+          <div class="metric-footer text-muted">Across all three assessments</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-label">Cohort Pass Rate</span>
+            <span class="metric-badge-icon">🎯</span>
+          </div>
+          <div class="metric-value highlight-green" id="metric-pass-rate">0.0%</div>
+          <div class="metric-footer text-muted">Students with overall average ≥ 50%</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-label">Below Passing Cutoff</span>
+            <span class="metric-badge-icon">⚠️</span>
+          </div>
+          <div class="metric-value highlight-red" id="metric-below-passing">0</div>
+          <div class="metric-footer text-muted">Students with average &lt; 50%</div>
+        </div>
+      </div>
+
+      <!-- Assessment Breakdown & Quick Navigation Cards -->
+      <div class="grid-2-col">
+        <!-- Assessment Breakdown -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Assessment Breakdown</h3>
+            <span class="badge badge-info">3 Assessments</span>
+          </div>
+          <div class="card-body">
+            <div class="assessment-breakdown-list">
+              <div class="breakdown-item">
+                <div class="breakdown-info">
+                  <span class="breakdown-name">Assessment 1 (Theory / Foundations)</span>
+                  <span class="breakdown-val" id="avg-assessment-1">0%</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill fill-blue" style="width: 70%;"></div>
+                </div>
+              </div>
+
+              <div class="breakdown-item">
+                <div class="breakdown-info">
+                  <span class="breakdown-name">Assessment 2 (Programming Paradigms Lab)</span>
+                  <span class="breakdown-val" id="avg-assessment-2">0%</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill fill-purple" style="width: 65%;"></div>
+                </div>
+              </div>
+
+              <div class="breakdown-item">
+                <div class="breakdown-info">
+                  <span class="breakdown-name">Assessment 3 (Interpreter Project Implementation)</span>
+                  <span class="breakdown-val" id="avg-assessment-3">0%</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill fill-emerald" style="width: 72%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions & Paradigm Summary -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">System & Paradigm Overview</h3>
+            <span class="badge badge-accent">CSCI 310 Architecture</span>
+          </div>
+          <div class="card-body">
+            <div class="paradigm-pill-container">
+              <div class="paradigm-summary-item">
+                <span class="paradigm-tag tag-fp">Functional Paradigm</span>
+                <p>Pure functions, immutability, and declarative array pipelines (<code>map</code>, <code>filter</code>, <code>reduce</code>) used for averages, pass rates, and report filtering.</p>
+              </div>
+              <div class="paradigm-summary-item">
+                <span class="paradigm-tag tag-imp">Imperative Paradigm</span>
+                <p>Sequential statements, state mutations, procedural validations, and loop-based CRUD logic used for student record storage in <code>localStorage</code>.</p>
+              </div>
+            </div>
+
+            <div class="quick-nav-actions">
+              <button id="quick-go-records" class="btn btn-primary btn-sm">Manage Student Records →</button>
+              <button id="quick-go-reports" class="btn btn-secondary btn-sm">View Detailed Reports →</button>
+              <button id="quick-go-interpreter" class="btn btn-outline btn-sm">Launch Mini-Interpreter →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================================== -->
+    <!-- SCREEN 2: STUDENT RECORDS -->
+    <!-- ==================================================================== -->
+    <section id="records-view" class="app-view" aria-labelledby="records-heading">
+      <div class="view-header">
+        <div>
+          <h2 id="records-heading" class="view-title">Student Records Management</h2>
+          <p class="view-description">Add, edit, view, and delete student assessment marks. Data persists in browser <code>localStorage</code>.</p>
+        </div>
+        <div class="view-actions">
+          <button id="btn-reset-data-records" class="btn btn-outline" title="Reset all records to initial fictional demo data">
+            🔄 Reset Demo Data
+          </button>
+          <button id="btn-open-add-modal" class="btn btn-primary">
+            ➕ Add Student Record
+          </button>
+        </div>
+      </div>
+
+      <!-- Records Table Container -->
+      <div class="card">
+        <div class="card-header flex-between">
+          <div>
+            <h3 class="card-title">All Student Records</h3>
+            <span class="card-subtitle">Validated required fields, duplicate ID checks, marks 0–100 (0 allowed)</span>
+          </div>
+          <span id="records-count-badge" class="badge badge-neutral">0 Students</span>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table" id="records-table">
+            <thead>
+              <tr>
+                <th>Student ID</th>
+                <th>Student Name</th>
+                <th>Assessment 1</th>
+                <th>Assessment 2</th>
+                <th>Assessment 3</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="records-table-body">
+              <!-- Dynamically populated via imperative DOM renderer -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================================== -->
+    <!-- SCREEN 3: PERFORMANCE REPORTS -->
+    <!-- ==================================================================== -->
+    <section id="reports-view" class="app-view" aria-labelledby="reports-heading">
+      <div class="view-header">
+        <div>
+          <h2 id="reports-heading" class="view-title">Performance Reports &amp; Analytics</h2>
+          <p class="view-description">Evaluates student averages against the 50% pass threshold. Filter by status and search instantly.</p>
+        </div>
+        <div class="view-actions">
+          <button id="btn-export-csv" class="btn btn-outline" title="Export current reports to CSV">
+            📥 Export to CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- Controls: Search & Filter Toolbar -->
+      <div class="filter-toolbar card">
+        <div class="toolbar-left">
+          <div class="search-input-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="report-search-input" placeholder="Search by student name or ID..." aria-label="Search student reports">
+          </div>
+        </div>
+
+        <div class="toolbar-right">
+          <div class="filter-btn-group" role="group" aria-label="Filter students by status">
+            <button class="filter-btn active" data-status="all">All</button>
+            <button class="filter-btn" data-status="pass">Passed (≥ 50%)</button>
+            <button class="filter-btn" data-status="fail">Needs Support (&lt; 50%)</button>
+          </div>
+          <span id="reports-result-count" class="badge badge-neutral">Showing 0 of 0</span>
+        </div>
+      </div>
+
+      <!-- Reports Table Card -->
+      <div class="card">
+        <div class="table-responsive">
+          <table class="data-table" id="reports-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Student Name</th>
+                <th>A1</th>
+                <th>A2</th>
+                <th>A3</th>
+                <th>Calculated Average</th>
+                <th>Status</th>
+                <th>Academic Support Plan</th>
+              </tr>
+            </thead>
+            <tbody id="reports-table-body">
+              <!-- Populated via pure functional pipeline -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State Message -->
+        <div id="reports-empty-state" class="empty-state hidden">
+          <div class="empty-state-icon">🔎</div>
+          <h3>No matching student records found</h3>
+          <p class="text-muted">No student records match the active search query or status filter.</p>
+          <button id="btn-reset-report-filter" class="btn btn-secondary btn-sm mt-3">Reset Search &amp; Filters</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================================== -->
+    <!-- SCREEN 4: MINI-INTERPRETER -->
+    <!-- ==================================================================== -->
+    <section id="interpreter-view" class="app-view" aria-labelledby="interpreter-heading">
+      <div class="view-header">
+        <div>
+          <h2 id="interpreter-heading" class="view-title">CSCI 310 Mini-Language Interpreter</h2>
+          <p class="view-description">Custom domain-specific language parser and evaluator without <code>eval()</code>. Validates syntax, argument types, and bounds.</p>
+        </div>
+      </div>
+
+      <!-- Language Reference Card -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h3 class="card-title">Grammar &amp; Language Specification</h3>
+          <span class="badge badge-accent">Non-eval() AST Parser</span>
+        </div>
+        <div class="card-body">
+          <div class="grammar-grid">
+            <div class="grammar-card">
+              <div class="grammar-title"><code>AVERAGE(m1, m2, ...)</code></div>
+              <p class="grammar-desc">Accepts 1 or more valid marks (0–100). Returns the calculated arithmetic mean.</p>
+              <div class="grammar-eg">Example: <code>AVERAGE(80, 70, 90)</code> → <strong>80</strong></div>
+            </div>
+
+            <div class="grammar-card">
+              <div class="grammar-title"><code>PASS(mark)</code></div>
+              <p class="grammar-desc">Accepts exactly 1 mark (0–100). Returns <strong>TRUE</strong> if mark ≥ 50, else <strong>FALSE</strong>.</p>
+              <div class="grammar-eg">Example: <code>PASS(65)</code> → <strong>TRUE</strong></div>
+            </div>
+
+            <div class="grammar-card">
+              <div class="grammar-title"><code>ELIGIBLE(mark, flag)</code></div>
+              <p class="grammar-desc">Accepts 1 mark (0–100) and 1 boolean attendance flag (<code>TRUE</code> / <code>FALSE</code>). Returns <strong>TRUE</strong> if mark ≥ 45 AND flag is TRUE.</p>
+              <div class="grammar-eg">Example: <code>ELIGIBLE(45, TRUE)</code> → <strong>TRUE</strong></div>
+            </div>
+          </div>
+
+          <!-- Interpreter Pipeline Step Diagram -->
+          <div class="pipeline-diagram">
+            <div class="pipeline-step"><span class="step-num">1</span> Input Text</div>
+            <div class="pipeline-arrow">➔</div>
+            <div class="pipeline-step"><span class="step-num">2</span> Lexer / Tokenizer</div>
+            <div class="pipeline-arrow">➔</div>
+            <div class="pipeline-step"><span class="step-num">3</span> Parser (AST)</div>
+            <div class="pipeline-arrow">➔</div>
+            <div class="pipeline-step"><span class="step-num">4</span> Semantic Validator</div>
+            <div class="pipeline-arrow">➔</div>
+            <div class="pipeline-step"><span class="step-num">5</span> Evaluator Output</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive REPL Console -->
+      <div class="grid-2-col">
+        <!-- Interactive Input & Result -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Interactive Expression Evaluator</h3>
+            <span class="badge badge-info">Live REPL</span>
+          </div>
+          <div class="card-body">
+            <!-- Sample Expression Quick Buttons -->
+            <label class="form-label mb-2">Click a sample expression or type your own:</label>
+            <div class="sample-chips-container mb-3">
+              <button class="sample-expr-btn" data-expr="AVERAGE(80, 70, 90)">AVERAGE(80,70,90)</button>
+              <button class="sample-expr-btn" data-expr="PASS(65)">PASS(65)</button>
+              <button class="sample-expr-btn" data-expr="PASS(42)">PASS(42)</button>
+              <button class="sample-expr-btn" data-expr="ELIGIBLE(45, TRUE)">ELIGIBLE(45,TRUE)</button>
+              <button class="sample-expr-btn" data-expr="ELIGIBLE(44, TRUE)">ELIGIBLE(44,TRUE)</button>
+              <button class="sample-expr-btn" data-expr="ELIGIBLE(75, FALSE)">ELIGIBLE(75,FALSE)</button>
+              <button class="sample-expr-btn" data-expr="AVERAGE(0, 50, 100)">AVERAGE(0,50,100)</button>
+              <button class="sample-expr-btn btn-sample-invalid" data-expr="AVERAGE()">AVERAGE() [Error test]</button>
+              <button class="sample-expr-btn btn-sample-invalid" data-expr="PASS(120)">PASS(120) [Error test]</button>
+              <button class="sample-expr-btn btn-sample-invalid" data-expr="ELIGIBLE(45, MAYBE)">ELIGIBLE(45, MAYBE) [Error test]</button>
+            </div>
+
+            <!-- Expression Input Box -->
+            <div class="form-group mb-3">
+              <label for="interpreter-input" class="form-label">Expression Command:</label>
+              <div class="input-action-wrapper">
+                <input type="text" id="interpreter-input" class="form-input code-font" placeholder="e.g. AVERAGE(80, 70, 90) or PASS(65)" autocomplete="off" spellcheck="false">
+                <button id="btn-evaluate" class="btn btn-primary">
+                  ⚡ Evaluate
+                </button>
+              </div>
+              <span class="field-hint">Press Enter or click Evaluate. Handles whitespace, case-insensitivity, and syntax errors.</span>
+            </div>
+
+            <!-- Evaluation Result Display Card -->
+            <div id="interpreter-result-card" class="interpreter-result-box hidden">
+              <div class="result-header">
+                <span class="result-header-title">Evaluation Outcome</span>
+                <span id="interpreter-status-badge" class="status-badge status-success">SUCCESS</span>
+              </div>
+              <div class="result-main-value" id="interpreter-output-text">
+                Result: <strong class="result-val">80</strong>
+              </div>
+              <div class="result-details" id="interpreter-details-box">
+                <!-- Trace and AST information -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- REPL History & Trace Log -->
+        <div class="card">
+          <div class="card-header flex-between">
+            <h3 class="card-title">Evaluation History Log</h3>
+            <button id="btn-clear-interpreter" class="btn btn-sm btn-outline">Clear History</button>
+          </div>
+          <div class="card-body">
+            <ul id="interpreter-history-list" class="interpreter-history-list">
+              <li class="empty-history text-muted">Evaluation history is empty. Run an expression to see logs.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================================================================== -->
+  <!-- MODAL: ADD / EDIT STUDENT RECORD -->
+  <!-- ==================================================================== -->
+  <div id="record-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modal-title" class="modal-title">Add New Student Record</h3>
+        <button id="btn-close-modal" class="btn-close" aria-label="Close modal">&times;</button>
+      </div>
+      
+      <form id="record-form" novalidate>
+        <div class="modal-body">
+          <div id="form-general-error" class="alert-banner alert-danger hidden mb-3"></div>
+
+          <!-- Student ID -->
+          <div class="form-group mb-3">
+            <label for="student-id" class="form-label">Student ID <span class="text-danger">*</span></label>
+            <input type="text" id="student-id" class="form-input" placeholder="e.g. STU109" required>
+            <span class="error-msg" id="error-student-id"></span>
+            <span class="field-hint">Must be unique across all student records.</span>
+          </div>
+
+          <!-- Student Name -->
+          <div class="form-group mb-3">
+            <label for="student-name" class="form-label">Full Name <span class="text-danger">*</span></label>
+            <input type="text" id="student-name" class="form-input" placeholder="e.g. Fatima Zahra" required>
+            <span class="error-msg" id="error-student-name"></span>
+          </div>
+
+          <!-- Assessment Marks (Grid) -->
+          <div class="marks-form-grid">
+            <div class="form-group">
+              <label for="student-mark1" class="form-label">Assessment 1 <span class="text-danger">*</span></label>
+              <input type="number" id="student-mark1" class="form-input" placeholder="0–100" min="0" max="100" step="any" required>
+              <span class="error-msg" id="error-mark1"></span>
+              <span class="field-hint">Mark 0 to 100 (0 is allowed)</span>
+            </div>
+
+            <div class="form-group">
+              <label for="student-mark2" class="form-label">Assessment 2 <span class="text-danger">*</span></label>
+              <input type="number" id="student-mark2" class="form-input" placeholder="0–100" min="0" max="100" step="any" required>
+              <span class="error-msg" id="error-mark2"></span>
+              <span class="field-hint">Mark 0 to 100 (0 is allowed)</span>
+            </div>
+
+            <div class="form-group">
+              <label for="student-mark3" class="form-label">Assessment 3 <span class="text-danger">*</span></label>
+              <input type="number" id="student-mark3" class="form-input" placeholder="0–100" min="0" max="100" step="any" required>
+              <span class="error-msg" id="error-mark3"></span>
+              <span class="field-hint">Mark 0 to 100 (0 is allowed)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="btn-cancel-modal" class="btn btn-outline">Cancel</button>
+          <button type="submit" id="btn-save-record" class="btn btn-primary">Save Student Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="notification-toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="container footer-inner">
+      <p>CSCI 310 Principles of Programming Languages &bull; Group Project</p>
+      <p class="text-muted">Demonstrates Imperative vs. Functional Paradigms &bull; Custom Mini-Interpreter &bull; Client-side <code>localStorage</code></p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="interpreter.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
